@@ -1,0 +1,1 @@
+To run it `cargo r --release`
