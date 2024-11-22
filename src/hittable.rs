@@ -1,3 +1,4 @@
+use crate::color::Color;
 use crate::ray::Ray;
 use crate::vec3::{self, Point3, Vec3};
 
@@ -7,6 +8,7 @@ pub struct HitRecord {
     pub normal: Vec3,
     pub t: f64,
     pub front_face: bool,
+    pub color: Color,
 }
 
 impl HitRecord {

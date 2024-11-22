@@ -1,3 +1,4 @@
+use crate::color::Color;
 use crate::hittable::{HitRecord, Hittable};
 use crate::ray::Ray;
 use crate::vec3::{self, Point3};
@@ -5,13 +6,15 @@ use crate::vec3::{self, Point3};
 pub struct Sphere {
     center: Point3,
     radius: f64,
+    color: Color,
 }
 
 impl Sphere {
-    pub fn new(cen: Point3, r: f64) -> Sphere {
+    pub fn new(cen: Point3, r: f64, color: Color) -> Sphere {
         Sphere {
             center: cen,
             radius: r,
+            color,
         }
     }
 }
@@ -42,6 +45,7 @@ impl Hittable for Sphere {
         rec.p = r.at(rec.t);
         let outward_normal = (rec.p - self.center) / self.radius;
         rec.set_face_normal(r, outward_normal);
+        rec.color = self.color;
         true
     }
 }

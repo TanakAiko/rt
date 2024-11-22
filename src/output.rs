@@ -2,8 +2,11 @@ use crate::{
     camera::Camera,
     color::{self, Color},
     common,
+    cube::Cube,
     hittable::{HitRecord, Hittable},
     hittable_list::HittableList,
+    light::Light,
+    plane::Plane,
     ray::Ray,
     sphere::Sphere,
     vec3::{self, Point3, Vec3},
@@ -46,14 +49,49 @@ impl Output {
         // World
 
         let mut world = HittableList::new();
-        world.add(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
-        world.add(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
+
+        // world.add(Box::new(Sphere::new(
+        //     Point3::new(2.0, 0.5, -1.0),
+        //     1.0,
+        //     Color::new(1.0, 1.0, 1.0),
+        // )));
+
+        world.add(Box::new(Sphere::new(
+            Point3::new(4.0, 1.0, 0.0),
+            0.5,
+            Color::new(1.0, 1.0, 1.0),
+        )));
+
+        world.add(Box::new(Plane::new(
+            Point3::new(-3.0, -1.0, -2.0),
+            10,
+            10,
+            Color::new(0.5, 0.35, 0.34),
+        )));
+
+        world.add(Box::new(Cube::new(
+            Point3::new(-1.0, 0.0, -1.0), // Coin minimal
+            Point3::new(0.0, 1.0, 0.0),   // Coin maximal
+            Color::new(1.0, 1.0, 1.0),
+        )));
+        world.add(Box::new(Sphere::new(
+            Point3::new(-1.0, 0.0, -1.0),
+            0.1,
+            Color::new(1.0, 0.0, 0.0),
+        )));
+        world.add(Box::new(Sphere::new(
+            Point3::new(0.0, 1.0, 0.0),
+            0.1,
+            Color::new(0.0, 0.0, 1.0),
+        )));
+
+        // Light source
+        let light = Light::new(Point3::new(2.0, 6.0, -4.0), Color::new(1.0, 1.0, 1.0));
 
         // Camera
-
         let cam = Camera::new(
-            Point3::new(-2.0, 3.0, 1.0),
-            Point3::new(0.0, 0.0, -1.0),
+            Point3::new(3.0, 2.2, -4.0),
+            Point3::new(2.0, 0.0, 0.0),
             Vec3::new(0.0, 1.0, 0.0),
             90.0,
             ASPECT_RATIO,
@@ -67,7 +105,7 @@ impl Output {
                     let u = (i as f64 + common::random_double()) / (IMAGE_WIDTH - 1) as f64;
                     let v = (j as f64 + common::random_double()) / (IMAGE_HEIGHT - 1) as f64;
                     let r = cam.get_ray(u, v);
-                    pixel_color += ray_color(&r, &world);
+                    pixel_color += ray_color(&r, &world, &light);
                 }
                 color::write_color(self, pixel_color, SAMPLES_PER_PIXEL);
             }
@@ -99,12 +137,27 @@ impl Output {
     }
 }
 
-fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
+fn ray_color(r: &Ray, world: &dyn Hittable, light: &Light) -> Color {
     let mut rec = HitRecord::new();
-    if world.hit(r, 0.0, common::INFINITY, &mut rec) {
-        return 0.5 * (rec.normal + Color::new(1.0, 1.0, 1.0));
+    if world.hit(r, 0.001, common::INFINITY, &mut rec) {
+        let lighting = compute_lighting(&rec.p, &rec.normal, world, light);
+        return rec.color * lighting;
     }
-    let unit_direction = vec3::unit_vector(r.direction());
-    let t = 0.5 * (unit_direction.y() + 1.0);
-    (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
+    Color::new(0.5, 0.7, 1.0) * light.intensity
+}
+
+fn compute_lighting(point: &Point3, normal: &Vec3, world: &dyn Hittable, light: &Light) -> Color {
+    let light_dir = vec3::unit_vector(light.position - *point); // Direction vers la lumière
+    let shadow_ray = Ray::new(*point, light_dir); // Rayon vers la lumière
+
+    // Vérifier s'il y a un obstacle entre le point et la lumière
+    let mut temp_rec = HitRecord::new();
+    if world.hit(&shadow_ray, 0.001, common::INFINITY, &mut temp_rec) {
+        return Color::new(0.4, 0.4, 0.4); // Ombre complète (pas de lumière)
+    }
+
+    // Calcul de l'éclairage diffus
+    let diff = vec3::dot(*normal, light_dir).max(0.4);
+    //println!("diff: {}", diff);
+    diff * light.intensity
 }

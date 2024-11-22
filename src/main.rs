@@ -9,6 +9,9 @@ pub mod sphere;
 pub mod hittable_list;
 pub mod common;
 pub mod camera;
+pub mod plane;
+pub mod light;
+pub mod cube;
 
 fn main() {
     println!("おはよう世界！");

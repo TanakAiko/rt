@@ -1,11 +1,25 @@
 use std::{
     fmt::{Display, Formatter, Result},
-    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub},
+    ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Neg, Sub},
 };
 
 #[derive(Copy, Clone, Default)]
 pub struct Vec3 {
     e: [f64; 3],
+}
+
+
+impl Index<usize> for Vec3 {
+    type Output = f64;
+
+    fn index(&self, i: usize) -> &Self::Output {
+        match i {
+            0 => &self.e[0], // Composante X
+            1 => &self.e[1], // Composante Y
+            2 => &self.e[2], // Composante Z
+            _ => panic!("Index out of range"),
+        }
+    }
 }
 
 impl Vec3 {
