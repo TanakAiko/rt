@@ -12,6 +12,8 @@ pub mod camera;
 pub mod plane;
 pub mod light;
 pub mod cube;
+pub mod cylinder;
+pub mod param;
 
 fn main() {
     println!("おはよう世界！");

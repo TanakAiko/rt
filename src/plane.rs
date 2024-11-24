@@ -4,12 +4,14 @@ use crate::{
     ray::Ray,
     vec3::{self, Point3, Vec3},
 };
+use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize, Clone, Copy)]
 pub struct Plane {
-    origine: Point3,
-    width: i32,
-    height: i32,
-    color: Color,
+    pub origine: Point3,
+    pub width: i32,
+    pub height: i32,
+    pub color: Color,
 }
 
 impl Plane {

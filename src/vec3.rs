@@ -3,7 +3,7 @@ use std::{
     ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Neg, Sub},
 };
 
-#[derive(Copy, Clone, Default)]
+#[derive(Copy, Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct Vec3 {
     e: [f64; 3],
 }

@@ -2,11 +2,13 @@ use crate::color::Color;
 use crate::hittable::{HitRecord, Hittable};
 use crate::ray::Ray;
 use crate::vec3::{unit_vector, Point3, Vec3};
+use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize, Clone, Copy)]
 pub struct Cube {
-    min: Point3, // Coin inférieur (minimum) du cube
-    max: Point3, // Coin supérieur (maximum) du cube
-    color: Color,
+    pub min: Point3, // Coin inférieur (minimum) du cube
+    pub max: Point3, // Coin supérieur (maximum) du cube
+    pub color: Color,
 }
 
 impl Cube {
@@ -40,7 +42,7 @@ impl Hittable for Cube {
 
         rec.t = t_min;
         rec.p = r.at(rec.t);
-        
+
         let outward_normal = if (rec.p.x() - self.min.x()).abs() < 1e-4 {
             // println!("Face gauche");
             Vec3::new(-1.0, 0.0, 0.0) // Face gauche

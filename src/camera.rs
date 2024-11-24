@@ -1,12 +1,18 @@
 use crate::ray::Ray;
 use crate::vec3::{Point3, Vec3};
 use crate::{common, vec3};
+use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize, Clone, Copy)]
 pub struct Camera {
-    origin: Point3,
-    lower_left_corner: Point3,
-    horizontal: Vec3,
-    vertical: Vec3,
+    pub origin: Point3,
+    pub look_at: Point3,
+    #[serde(skip)]
+    pub lower_left_corner: Point3,
+    #[serde(skip)]
+    pub horizontal: Vec3,
+    #[serde(skip)]
+    pub vertical: Vec3,
 }
 
 impl Camera {
@@ -33,6 +39,7 @@ impl Camera {
 
         Camera {
             origin,
+            look_at: lookat,
             lower_left_corner,
             horizontal,
             vertical,

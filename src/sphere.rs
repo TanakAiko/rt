@@ -2,11 +2,13 @@ use crate::color::Color;
 use crate::hittable::{HitRecord, Hittable};
 use crate::ray::Ray;
 use crate::vec3::{self, Point3};
+use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize, Clone, Copy)]
 pub struct Sphere {
-    center: Point3,
-    radius: f64,
-    color: Color,
+    pub center: Point3,
+    pub radius: f64,
+    pub color: Color,
 }
 
 impl Sphere {

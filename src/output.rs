@@ -2,13 +2,11 @@ use crate::{
     camera::Camera,
     color::{self, Color},
     common,
-    cube::Cube,
     hittable::{HitRecord, Hittable},
     hittable_list::HittableList,
     light::Light,
-    plane::Plane,
+    param::Scene,
     ray::Ray,
-    sphere::Sphere,
     vec3::{self, Point3, Vec3},
 };
 use std::fs::OpenOptions;
@@ -46,52 +44,24 @@ impl Output {
     pub fn edit_image(&mut self) {
         self.pixel_color.clear();
 
+        let scene = Scene::from_file("scene.json");
+
         // World
 
         let mut world = HittableList::new();
-
-        // world.add(Box::new(Sphere::new(
-        //     Point3::new(2.0, 0.5, -1.0),
-        //     1.0,
-        //     Color::new(1.0, 1.0, 1.0),
-        // )));
-
-        world.add(Box::new(Sphere::new(
-            Point3::new(4.0, 1.0, 0.0),
-            0.5,
-            Color::new(1.0, 1.0, 1.0),
-        )));
-
-        world.add(Box::new(Plane::new(
-            Point3::new(-3.0, -1.0, -2.0),
-            10,
-            10,
-            Color::new(0.5, 0.35, 0.34),
-        )));
-
-        world.add(Box::new(Cube::new(
-            Point3::new(-1.0, 0.0, -1.0), // Coin minimal
-            Point3::new(0.0, 1.0, 0.0),   // Coin maximal
-            Color::new(1.0, 1.0, 1.0),
-        )));
-        world.add(Box::new(Sphere::new(
-            Point3::new(-1.0, 0.0, -1.0),
-            0.1,
-            Color::new(1.0, 0.0, 0.0),
-        )));
-        world.add(Box::new(Sphere::new(
-            Point3::new(0.0, 1.0, 0.0),
-            0.1,
-            Color::new(0.0, 0.0, 1.0),
-        )));
+        world.set_scene(scene.clone());
 
         // Light source
-        let light = Light::new(Point3::new(2.0, 6.0, -4.0), Color::new(1.0, 1.0, 1.0));
+        let light = Light::new(
+            scene.light.position,
+            scene.light.color,
+            scene.light.intensity,
+        );
 
         // Camera
         let cam = Camera::new(
-            Point3::new(3.0, 2.2, -4.0),
-            Point3::new(2.0, 0.0, 0.0),
+            scene.camera.origin,
+            scene.camera.look_at,
             Vec3::new(0.0, 1.0, 0.0),
             90.0,
             ASPECT_RATIO,
@@ -143,7 +113,7 @@ fn ray_color(r: &Ray, world: &dyn Hittable, light: &Light) -> Color {
         let lighting = compute_lighting(&rec.p, &rec.normal, world, light);
         return rec.color * lighting;
     }
-    Color::new(0.5, 0.7, 1.0) * light.intensity
+    Color::new(0.5, 0.7, 1.0) * light.color * light.intensity
 }
 
 fn compute_lighting(point: &Point3, normal: &Vec3, world: &dyn Hittable, light: &Light) -> Color {
@@ -159,5 +129,5 @@ fn compute_lighting(point: &Point3, normal: &Vec3, world: &dyn Hittable, light: 
     // Calcul de l'éclairage diffus
     let diff = vec3::dot(*normal, light_dir).max(0.4);
     //println!("diff: {}", diff);
-    diff * light.intensity
+    diff * light.color * light.intensity
 }
